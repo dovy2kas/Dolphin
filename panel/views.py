@@ -10,6 +10,11 @@ def panel(request):
   template = loader.get_template('panel.html')
   return HttpResponse(template.render())
 
+@login_required
+def payloads(request):
+  template = loader.get_template('payloads.html')
+  return HttpResponse(template.render())
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
