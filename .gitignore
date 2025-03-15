@@ -1,3 +1,5 @@
 db.sqlite3
 Dolphin/.env
 Dolphin/__pycache__
+panel/__pycache__
+control/__pycache__
