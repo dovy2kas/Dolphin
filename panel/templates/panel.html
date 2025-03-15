@@ -51,17 +51,28 @@
         </div>
         <div class="w-full h-full bg-gray-50 dark:bg-slate-700 dark:border-gray-700  p-4 overflow-auto rounded-b">
 
+            {% for client in clients %}
             <div class="flex w-full bg-slate-400 mb-2 h-10 items-center">
                 <!-- Left side -->
                 <input type="checkbox" class="shrink-0 m-2 border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 checked:border-blue-500
                                             disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 
                                             dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" style="width: 20px; height: 20px;">
                 <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
-                <div class="inline-block m-2"> <i class="ph ph-windows-logo text-sky-400 text-3xl"></i> </div>
+                <div class="inline-block m-2">
+                    {% if client.os == "Windows" %}
+                        <i class="ph ph-windows-logo text-sky-400 text-3xl"></i>
+                    {% elif client.os == "Linux" %}
+                        <i class="ph ph-linux-logo text-green-400 text-3xl"></i>
+                    {% endif %}
+                </div>
                 <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
-                <p class="inline-block m-2">Windows 10</p>
+                <p class="inline-block m-2">{{ client.os }}</p>
                 <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
-                <p class="inline-block m-2">192.168.0.159</p>
+                <p class="inline-block m-2">{{ client.ip_address }}</p>
+                <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
+                <p class="inline-block m-2">{{ client.country }}</p>
+                <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
+                <p class="inline-block m-2">{{ client.privileges }}</p>
                 <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
                 <!-- Right side -->
                 <div class="inline-block h-full ml-auto mr-2">
@@ -70,8 +81,8 @@
                         <p class="inline-block ml-2">Info</p>
                     </div>
                 </div>
-    
             </div>
+            {% endfor %}
     
         </div>
     </div>
