@@ -61,7 +61,7 @@
                 <div class="inline-block m-2">
                     {% if client.os == "Windows" %}
                         <i class="ph ph-windows-logo text-sky-400 text-3xl"></i>
-                    {% elif client.os == "Linux" %}
+                    {% elif "Linux" in client.os %}
                         <i class="ph ph-linux-logo text-green-400 text-3xl"></i>
                     {% endif %}
                 </div>

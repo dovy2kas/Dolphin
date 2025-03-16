@@ -2,22 +2,15 @@ import re
 import random
 import string
 
-# ================================
-# Helper Functions
-# ================================
-
 def random_string(length=8):
-    """Generate a random alphanumeric string starting with a letter"""
-    first_char = random.choice(string.ascii_letters)  # First character must be a letter
+    first_char = random.choice(string.ascii_letters)
     rest = ''.join(random.choices(string.ascii_letters + string.digits, k=length - 1))
     return first_char + rest
 
 def xor_encrypt(text, key):
-    """XOR encrypt the string"""
     return ",".join(str(ord(char) ^ key) for char in text)
 
 def add_decryption_function(code):
-    """Inject a decryption function into the payload"""
     decryptor = """
 def decrypt_string(data, key):
     result = ''.join(chr(int(x) ^ key) for x in data.split(','))
@@ -30,10 +23,8 @@ def decrypt_string(data, key):
     return decryptor + code
 
 def encrypt_strings(code):
-    """Encrypt normal strings and f-strings"""
     key = random.randint(1, 255)
 
-    # Handle f-strings separately from normal strings
     fstring_matches = re.findall(r'f\"(.*?)\"', code)
     normal_matches = re.findall(r'\"(.*?)\"', code)
 
@@ -43,18 +34,16 @@ def encrypt_strings(code):
         code = code.replace(f'f"{string}"', decrypted)
 
     for string in normal_matches:
-        if string not in fstring_matches:  # Avoid double encryption
+        if string not in fstring_matches:
             encrypted = xor_encrypt(string, key)
             decrypted = f'decrypt_string("{encrypted}", {key})'
             code = code.replace(f'"{string}"', decrypted)
 
-    # Add decryption function to the payload
     code = add_decryption_function(code)
 
     return code
 
 def rename_functions(code):
-    """Rename functions consistently (definitions + calls)"""
     functions = re.findall(r'def (\w+)\(', code)
     mapping = {func: random_string() for func in functions}
 
@@ -65,8 +54,7 @@ def rename_functions(code):
     return code
 
 def add_state_machine_execution(code):
-    """Convert code execution into a state machine"""
-    states = random.sample(range(10, 100), 3)  # Three random state values
+    states = random.sample(range(10, 100), 3)
     state_var = random_string()
 
     state_machine = f"""
@@ -87,41 +75,30 @@ while {state_var}:
         {state_var} = 0
 """
 
-    # Insert the state machine after the imports
     code = re.sub(r'if __name__ == "__main__":', state_machine, code)
     
     return code
 
 def add_opaque_predicates(code):
-    """Add fake but complex if-statements to confuse analysis"""
     predicate = """
 if ((134 * 7) % 5) == 2 or (1234 % 111) == 10:
     print("This is a bogus branch")
 """
 
-    # Inject after function definitions
     code = code.replace("\ndef", f"\n{predicate}\ndef")
 
     return code
-
-# ================================
-# Polymorphic Generator
-# ================================
 
 def generate_polymorphic_payload(input_path, output_path):
     with open(input_path, 'r') as f:
         code = f.read()
 
-    # Rename functions
     code = rename_functions(code)
 
-    # Encrypt strings (including f-strings)
     code = encrypt_strings(code)
 
-    # Add opaque predicates
     code = add_opaque_predicates(code)
 
-    # Add state machine-based execution
     code = add_state_machine_execution(code)
 
     with open(output_path, 'w') as f:
@@ -129,11 +106,7 @@ def generate_polymorphic_payload(input_path, output_path):
 
     print(f"[+] Polymorphic payload generated: {output_path}")
 
-# ================================
-# Main
-# ================================
-
 if __name__ == "__main__":
-    input_path = 'main.py'
-    output_path = 'polymorphic_main.py'
+    input_path = './client/main.py'
+    output_path = './client/polymorphic_main.py'
     generate_polymorphic_payload(input_path, output_path)

@@ -13,6 +13,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 LOGIN_URL="/panel/login"
+COMPILED_PAYLOADS_URL = '../compiled_payloads/'
+COMPILED_PAYLOADS_ROOT = os.path.join(BASE_DIR, 'compiled_payloads')
 
 # Application definition
 

