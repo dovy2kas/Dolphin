@@ -3,3 +3,6 @@ Dolphin/.env
 Dolphin/__pycache__
 panel/__pycache__
 control/__pycache__
+dist/
+compiled_payloads/
+client/polymorphic_main.py

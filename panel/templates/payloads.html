@@ -11,21 +11,17 @@
         <div class="rounded-t bg-gray-50 dark:bg-slate-700 dark:border-gray-700 p-4">
             <form id="payload-form" method="post" action="{% url 'payloads' %}">
                 {% csrf_token %}
-                
+                <p class="mb-2">Select the OS:</p>
                 <div class="flex items-center mb-4">
                     <input id="windows" type="radio" value="windows" name="os" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                    <label for="windows" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Windows</label>
-                </div>
-                <div class="flex items-center">
+                    <label for="windows" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 mr-2">Windows</label>
                     <input checked id="linux" type="radio" value="linux" name="os" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                     <label for="linux" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Linux</label>
                 </div>
-
+                <p class="mb-2">Select the format:</p>
                 <div class="flex items-center mb-4">
                     <input id="py" type="radio" value="py" name="format" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                    <label for="py" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">.py</label>
-                </div>
-                <div class="flex items-center">
+                    <label for="py" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 mr-2">.py</label>
                     <input checked id="exe" type="radio" value="exe" name="format" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                     <label for="exe" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">.exe</label>
                 </div>
@@ -41,7 +37,30 @@
             <h2 class="text-xl font-bold leading-tight tracking-tight md:text-2xl">Generated Payloads</h2>
             <ul>
                 {% for payload in payloads %}
-                    <li>{{ payload.os }} - {{ payload.format }} - <a href="{{ payload.file_path }}" download>Download</a></li>
+                    <div class="flex w-full bg-slate-400 mb-2 h-10 items-center">
+                        <!-- Left side -->
+                        <div class="inline-block m-2">
+                            {% if payload.os == "windows" %}
+                                <i class="ph ph-windows-logo text-sky-400 text-3xl"></i>
+                            {% elif "linux" in payload.os %}
+                                <i class="ph ph-linux-logo text-green-400 text-3xl"></i>
+                            {% endif %}
+                        </div>
+                        <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
+                        <p class="inline-block m-2">{{ payload.os }}</p>
+                        <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
+                        <p class="inline-block m-2">{{ payload.format }}</p>
+                        <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
+                        <p class="inline-block m-2">{{ payload.created_at }}</p>
+                        <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
+                        <!-- Right side -->
+                        <div class="inline-block h-full ml-auto mr-2">
+                            <div class="flex h-full items-center">
+                                <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
+                                <p class="inline-block ml-2"><a href="{{ payload.file_path }}" download>Download</a></p>
+                            </div>
+                        </div>
+                    </div>
                 {% endfor %}
             </ul>
         </div>
