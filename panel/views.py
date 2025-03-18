@@ -29,7 +29,7 @@ def payloads(request):
         if os_type == 'windows' and format_type == 'exe':
             script_path = os.path.join(os.path.dirname(__file__), '../client/comp_nuitka.py')
             script_name = './client/polymorphic_main.py'
-            exe_name = f'winpayload_{Payload.objects.count() + 1}.exe'
+            exe_name = f'winpayload_{Payload.objects.filter(os="windows", format="exe").count() + 1}.exe'
             subprocess.run(['python3', './client/polymorphism.py'])
             time.sleep(3)
             subprocess.run(['python3', script_path, script_name, exe_name])
@@ -39,10 +39,19 @@ def payloads(request):
             payload.save()
             payloads = Payload.objects.all()
             return render(request, 'payloads.html', {'status': 'success', 'message': "Payload successfully generated!", "payloads": payloads})
-        elif os_type == 'windows' and format_type == 'py':
-            print("To be implemented")
-        elif os_type == "linux" and format_type == "py":
-            print("To be implemented")
+        elif (os_type == 'windows' or os_type == "linux") and format_type == 'py':
+            subprocess.run(['python3', './client/polymorphism.py'])
+            time.sleep(3)
+            script_name = './client/polymorphic_main.py'
+            unique_name = f'{os_type}_payload_{Payload.objects.filter(os=os_type, format="py").count() + 1}.py'
+            compiled_path = os.path.join('compiled_payloads', unique_name)
+            os.rename(script_name, compiled_path)
+
+            payload = Payload(os=os_type, format=format_type, file_path="../../" + compiled_path)
+            payload.save()
+            payloads = Payload.objects.all()
+            return render(request, 'payloads.html', {'status': 'success', 'message': "Payload successfully generated!", "payloads": payloads})
+            
         else:
             payloads = Payload.objects.all()
             return render(request, 'payloads.html', {'status': 'error', 'message': "Invalid os/type combination!", "payloads": payloads})

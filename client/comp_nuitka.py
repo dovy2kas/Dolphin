@@ -19,6 +19,7 @@ def compile_to_exe(script_name, exe_name):
         "--onefile",
         "--windows-disable-console",
         "--output-dir=dist",
+        "--msvc=latest",
         f"--output-filename={exe_name}",
         script_name
     ]
