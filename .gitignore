@@ -6,3 +6,6 @@ control/__pycache__
 dist/
 compiled_payloads/
 client/polymorphic_main.py
+client/build
+client/dist
+client/polymorphic_main.spec
