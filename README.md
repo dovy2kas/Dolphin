@@ -5,10 +5,10 @@ An HTTP remote access tool (RAT)
 
 - Obfuscated and polymorphic initial payload
 - Easy payload generation for different platforms
+- Modular payloads
 
 ## Planned features
 
-- Modular payloads
 - Staging
 - Persistence
 - Interactive shell

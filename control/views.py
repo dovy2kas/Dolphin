@@ -60,7 +60,7 @@ def get_command(request):
         client.save()
         
         command = Command.objects.filter(bot_id=client.id, executed=0).values().first()
-        print(f"command: {command}")
+
         if command:
             return JsonResponse({
                 "command": command["command"],

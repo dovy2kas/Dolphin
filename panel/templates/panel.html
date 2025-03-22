@@ -9,33 +9,34 @@
 <div class="flex flex-row justify-evenly items-start flex-nowrap gap-4 h-full min-h-full h-screen text-slate-100">
     <div class="w-full h-1/2 m-4">
         <div class="rounded-t h-full bg-gray-50 dark:bg-slate-700 dark:border-gray-700 p-4">
-            <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="w-1/2 h-10 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none 
-                                                                                focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex 
-                                                                                items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" 
-                                                                                type="button">Select the payload <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" 
-                                                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-            </svg>
-            </button>
-            
-            <div id="dropdown" class="z-10 hidden absolute bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700">
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Keylogger</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Screenshot</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dump passwords</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">DDoS</a>
-                  </li>
-                </ul>
-            </div>
+            <form id="moduleExecutionForm" method="POST" action="">
+                {% csrf_token %}
+                <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="w-1/2 h-10 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none 
+                                                                                    focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex 
+                                                                                    items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" 
+                                                                                    type="button">Select the module <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" 
+                                                                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                </svg>
+                </button>
+                
+                <div id="dropdown" class="z-10 hidden absolute bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700">
+                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+                        {% for module in modules %}
+                        <li>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white module-option" data-module-id="{{ module.id }}" data-arguments="{{ module.required_arguments|safe }}">
+                                {{ module.name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div id="moduleArguments" class="mt-4"></div>
+
+                <button type="submit" class="w-full mt-4 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Execute Module</button>
+            </form>
         </div>
-        <button type="button" class="w-full focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-b text-sm px-5 py-2.5 me-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Execute payload</button>
     </div>
     
     <div class="w-full h-1/2 m-4">
@@ -55,8 +56,9 @@
             <div class="flex w-full bg-slate-400 mb-2 h-10 items-center">
                 <!-- Left side -->
                 <input type="checkbox" class="shrink-0 m-2 border-gray-200 rounded-sm text-blue-600 focus:ring-blue-500 checked:border-blue-500
-                                            disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 
-                                            dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" style="width: 20px; height: 20px;">
+                                    disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-blue-500 
+                                    dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" 
+                                    data-client-id="{{ client.id }}" style="width: 20px; height: 20px;">
                 <div class="inline-block h-full w-0.5 min-h-[1em] bg-neutral-100 dark:bg-white/10"></div>
                 <div class="inline-block m-2">
                     {% if client.os == "Windows" %}
@@ -93,9 +95,94 @@
     document.addEventListener('DOMContentLoaded', function() {
         const dropdownButton = document.getElementById('dropdownDefaultButton');
         const dropdownMenu = document.getElementById('dropdown');
-    
+        const moduleArguments = document.getElementById('moduleArguments');
+        const executeButton = document.querySelector('button[type="submit"]');
+        const clientCheckboxes = document.querySelectorAll('input[type="checkbox"][data-client-id]');
+        const selectAllCheckbox = document.querySelector('input[type="checkbox"]:not([data-client-id])');
+
         dropdownButton.addEventListener('click', function() {
             dropdownMenu.classList.toggle('hidden');
+        });
+        
+        document.querySelectorAll('.module-option').forEach(option => {
+            option.addEventListener('click', function(event) {
+                event.preventDefault();
+                const moduleId = this.getAttribute('data-module-id');
+                const argumentsData = JSON.parse(this.getAttribute('data-arguments').replace(/'/g, '"'));
+
+                moduleArguments.innerHTML = '';
+                for (const [argName, argType] of Object.entries(argumentsData)) {
+                    const inputField = `
+                        <div class="mb-4">
+                            <label for="${argName}" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">${argName} (${argType})</label>
+                            <input type="text" id="${argName}" name="arguments[${argName}]" class="block w-full p-2 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:ring-blue-500 
+                                                focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                        </div>
+                    `;
+                    moduleArguments.insertAdjacentHTML('beforeend', inputField);
+                }
+
+                const hiddenModuleInput = `<input type="hidden" id="moduleId" name="module_id" value="${moduleId}">`;
+                moduleArguments.insertAdjacentHTML('beforeend', hiddenModuleInput);
+
+                dropdownMenu.classList.add('hidden');
+            });
+        });
+
+        selectAllCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            clientCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+        });
+
+        executeButton.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const selectedClients = Array.from(clientCheckboxes)
+                .filter(checkbox => checkbox.checked)
+                .map(checkbox => checkbox.dataset.clientId);
+
+            if (selectedClients.length === 0) {
+                alert('Please select at least one client.');
+                return;
+            }
+
+            const moduleId = document.getElementById('moduleId')?.value;
+            if (!moduleId) {
+                alert('Please select a module.');
+                return;
+            }
+
+            const argumentsData = {};
+            document.querySelectorAll('#moduleArguments input[type="text"]').forEach(input => {
+                argumentsData[input.name] = input.value;
+            });
+
+            fetch("{% url 'send_command_to_clients' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    clients: selectedClients,
+                    module_id: moduleId,
+                    arguments: argumentsData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Command successfully sent to clients.');
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while sending the command.');
+            });
         });
     });
 </script>

@@ -16,6 +16,13 @@ LOGIN_URL="/panel/login"
 COMPILED_PAYLOADS_URL = '../compiled_payloads/'
 COMPILED_PAYLOADS_ROOT = os.path.join(BASE_DIR, 'compiled_payloads')
 
+
+UPLOADED_SCRIPTS_DIR = os.path.join(BASE_DIR, 'uploaded_scripts')
+
+STATICFILES_DIRS = [
+    UPLOADED_SCRIPTS_DIR,
+]
+
 # Application definition
 
 INSTALLED_APPS = [
