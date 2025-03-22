@@ -48,7 +48,6 @@ def payloads(request):
             return render(request, 'payloads.html', {'status': 'success', 'message': "Payload successfully generated!", "payloads": payloads})
 
         elif (os_type == 'windows' or os_type == "linux") and format_type == 'py':
-            # Run polymorphism script
             polymorphism_result = subprocess.run(['python3', './client/polymorphism.py'])
             if polymorphism_result.returncode != 0:
                 payloads = Payload.objects.all()
