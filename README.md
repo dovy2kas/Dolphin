@@ -18,7 +18,7 @@ An HTTP remote access tool (RAT)
 
 ## Installation and usage
 
-Install docker: [https://docs.docker.com/engine/install/]https://docs.docker.com/engine/install/
+Install docker: <https://docs.docker.com/engine/install/>
 
 Install python requirements:
 `pip3 install -r requirements.txt`
