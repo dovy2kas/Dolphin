@@ -30,7 +30,7 @@ class Payload(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.os} - {self.format} - {self.file_path}"\
+        return f"{self.os} - {self.format} - {self.file_path}"
 
 class Module(models.Model):
     name = models.CharField(max_length=100, unique=True)

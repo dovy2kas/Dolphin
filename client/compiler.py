@@ -18,7 +18,7 @@ def compile_to_exe_with_docker(script_name, exe_name):
     client_dir = os.path.abspath(os.path.dirname(__file__))
     print(f"[+] Using volume path: {client_dir}")
 
-    docker_command = f'docker run --rm --volume {client_dir}:/src/:z batonogov/pyinstaller-windows:latest "pip install requests; pyinstaller --onefile --hidden-import=requests --collect-all requests --name {exe_name} {script_name}"'
+    docker_command = f'docker run --rm --volume {client_dir}:/src/:z batonogov/pyinstaller-windows:latest "pip install requests; pyinstaller --onefile --hidden-import=requests --collect-all requests --add-data "python-embed;python-embed" --name {exe_name} {script_name}"'
 
     try:
         result = subprocess.run(docker_command, shell=True, capture_output=True, text=True)
